@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { 
   Search, Globe, Building2, MapPin, DollarSign, 
   Layers, ArrowRight, Zap, Filter, Compass, 
-  ExternalLink, Sparkles, MessageSquare, Bot, 
+  ExternalLink, MessageSquare, Bot, 
   Award, CheckCircle2, ChevronRight, RefreshCw,
-  Cpu, Flame, TrendingUp
+  Cpu, Flame, TrendingUp, CreditCard, Package,
+  Shield, Target, AlertTriangle
 } from 'lucide-react';
 import { DiscoveredCompany, DiscoveryResponse } from '../types';
 import { API_BASE_URL } from '../api/config';
@@ -15,12 +16,12 @@ interface CompanyFinderPageProps {
 }
 
 const SAMPLE_PRESETS = [
-  { label: '🚀 AI Automation India', query: 'Fast growing AI automation agencies and enterprise AI startups in India' },
-  { label: '⚡ DevTools & Code AI', query: 'Developer tooling and AI code intelligence startups' },
-  { label: '💳 FinTech & Payments', query: 'Emerging B2B FinTech startups and payment orchestrators' },
-  { label: '📦 Logistics & Supply Chain AI', query: 'AI startups automating logistics and supply chain workflows' },
-  { label: '🛡️ Cyber Security Startups', query: 'Fast-growing cloud security and identity protection startups' },
-  { label: '🎯 Companies like Linear', query: 'High-velocity project management and issue tracking tools similar to Linear' },
+  { icon: Flame, label: 'AI Automation India', query: 'Fast growing AI automation agencies and enterprise AI startups in India' },
+  { icon: Cpu, label: 'DevTools & Code AI', query: 'Developer tooling and AI code intelligence startups' },
+  { icon: CreditCard, label: 'FinTech & Payments', query: 'Emerging B2B FinTech startups and payment orchestrators' },
+  { icon: Package, label: 'Logistics & Supply Chain AI', query: 'AI startups automating logistics and supply chain workflows' },
+  { icon: Shield, label: 'Cyber Security Startups', query: 'Fast-growing cloud security and identity protection startups' },
+  { icon: Target, label: 'Companies like Linear', query: 'High-velocity project management and issue tracking tools similar to Linear' },
 ];
 
 const INDUSTRIES = ['All Industries', 'Artificial Intelligence', 'B2B SaaS', 'FinTech', 'DevTools', 'HealthTech', 'E-Commerce', 'Cybersecurity', 'EdTech'];
@@ -183,18 +184,22 @@ export const CompanyFinderPage: React.FC<CompanyFinderPageProps> = ({ onLaunchAu
             <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', fontWeight: '600' }}>
               Suggestions:
             </span>
-            {SAMPLE_PRESETS.map((p, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => handleSearch(p.query)}
-                className="target-chip"
-                disabled={isLoading}
-                style={{ fontSize: '0.74rem', padding: '4px 10px' }}
-              >
-                {p.label}
-              </button>
-            ))}
+            {SAMPLE_PRESETS.map((p, idx) => {
+              const IconComp = p.icon;
+              return (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => handleSearch(p.query)}
+                  className="target-chip"
+                  disabled={isLoading}
+                  style={{ fontSize: '0.74rem', padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                >
+                  <IconComp size={12} color="var(--cyan-neon)" />
+                  <span>{p.label}</span>
+                </button>
+              );
+            })}
           </div>
 
           {/* Filters Matrix */}
@@ -300,9 +305,13 @@ export const CompanyFinderPage: React.FC<CompanyFinderPageProps> = ({ onLaunchAu
           padding: '14px 20px',
           color: '#ff4d88',
           fontSize: '0.88rem',
-          marginBottom: '24px'
+          marginBottom: '24px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
         }}>
-          ⚠️ {errorMsg}
+          <AlertTriangle size={16} />
+          <span>{errorMsg}</span>
         </div>
       )}
 
@@ -350,10 +359,14 @@ export const CompanyFinderPage: React.FC<CompanyFinderPageProps> = ({ onLaunchAu
                         fontSize: '0.76rem',
                         padding: '4px 12px',
                         borderRadius: '20px',
-                        cursor: 'pointer'
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px'
                       }}
                     >
-                      💬 {sug}
+                      <MessageSquare size={12} />
+                      <span>{sug}</span>
                     </button>
                   ))}
                 </div>
@@ -475,7 +488,9 @@ export const CompanyFinderPage: React.FC<CompanyFinderPageProps> = ({ onLaunchAu
                     lineHeight: '1.4',
                     marginBottom: '10px'
                   }}>
-                    <strong style={{ color: 'var(--cyan-neon)' }}>🎯 Match Rationale: </strong>
+                    <span style={{ color: 'var(--cyan-neon)', display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: '700', marginRight: '4px' }}>
+                      <Target size={12} /> Match Rationale:
+                    </span>
                     {company.why_it_matches}
                   </div>
 
@@ -499,10 +514,13 @@ export const CompanyFinderPage: React.FC<CompanyFinderPageProps> = ({ onLaunchAu
                               borderRadius: '4px',
                               background: 'rgba(255, 255, 255, 0.04)',
                               border: '1px solid var(--border-subtle)',
-                              color: 'var(--text-muted)'
+                              color: 'var(--text-muted)',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px'
                             }}
                           >
-                            ✓ {f}
+                            <CheckCircle2 size={10} color="var(--green-neon)" /> {f}
                           </span>
                         ))}
                       </div>

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Terminal, Activity, CheckCircle2, Loader2, Cpu, ShieldCheck, Clock } from 'lucide-react';
+import { Terminal, Activity, CheckCircle2, Loader2, Cpu, ShieldCheck, Clock, Zap, Circle } from 'lucide-react';
 import { StreamEvent, ForensicCompanyReport } from '../types';
 
 interface LiveResearchTerminalProps {
@@ -145,8 +145,14 @@ export const LiveResearchTerminal: React.FC<LiveResearchTerminalProps> = ({
                     <span style={{ color: isCurrentlyActive ? 'var(--cyan-neon)' : isFinished ? 'var(--text-muted)' : 'var(--text-dim)' }}>
                       &gt; {agent.label}
                     </span>
-                    <span style={{ fontWeight: '800', color: isFinished ? 'var(--green-neon)' : isCurrentlyActive ? 'var(--cyan-neon)' : 'var(--text-dim)' }}>
-                      {isFinished ? '✓' : isCurrentlyActive ? '⚡' : '○'}
+                    <span style={{ display: 'flex', alignItems: 'center' }}>
+                      {isFinished ? (
+                        <CheckCircle2 size={13} color="var(--green-neon)" />
+                      ) : isCurrentlyActive ? (
+                        <Zap size={13} color="var(--cyan-neon)" />
+                      ) : (
+                        <Circle size={10} color="var(--text-dim)" />
+                      )}
                     </span>
                   </div>
                 );
