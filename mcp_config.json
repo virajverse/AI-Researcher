@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "firecrawl": {
+      "command": "npx",
+      "args": ["-y", "firecrawl-mcp"],
+      "env": {
+        "FIRECRAWL_API_KEY": ""
+      },
+      "description": "Firecrawl clean markdown web scraping and recursive crawler MCP server"
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@executeautomation/playwright-mcp-server"],
+      "description": "Playwright headless browser DOM extraction and JS rendering MCP server"
+    }
+  }
+}
