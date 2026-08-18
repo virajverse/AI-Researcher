@@ -1,13 +1,20 @@
 import sys
 import os
 
-# Add backend root to Python path for Vercel Serverless Functions
-backend_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "backend")
-if backend_dir not in sys.path:
-    sys.path.insert(0, backend_dir)
+# Add all search paths for Vercel Serverless Function runtime
+current_dir = os.path.dirname(os.path.abspath(__file__))
+root_dir = os.path.abspath(os.path.join(current_dir, ".."))
+backend_dir = os.path.join(root_dir, "backend")
 
-# Ensure writable SQLite storage on Vercel ephemeral filesystem
+for p in [backend_dir, root_dir, current_dir]:
+    if p not in sys.path:
+        sys.path.insert(0, p)
+
+# Writable SQLite path for ephemeral serverless filesystem
 if os.environ.get("VERCEL"):
     os.environ["DATABASE_PATH"] = "/tmp/dossiers.db"
 
-from app.main import app
+try:
+    from app.main import app
+except ImportError:
+    from backend.app.main import app

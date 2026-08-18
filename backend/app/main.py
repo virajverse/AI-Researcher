@@ -30,12 +30,15 @@ logger = logging.getLogger("forensic-researcher")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Initializing Forensic AI Company Researcher Backend...")
-    await db.init_db()
+    try:
+        await db.init_db()
+    except Exception as e:
+        logger.warning(f"Database init warning: {e}")
     yield
     logger.info("Shutting down Forensic Researcher Backend.")
 
 app = FastAPI(
-    title="Forensic AI Company Researcher API (Part 6)",
+    title="Forensic AI Company Researcher API",
     description="Deep forensic intelligence engine for pre-meeting company investigations powered by NVIDIA NIM & Multi-Agent Swarm.",
     version="1.0.0",
     lifespan=lifespan
@@ -50,16 +53,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/")
+@app.get("/api")
 @app.get("/api/health")
+@app.get("/health")
 async def health_check():
     return {
         "status": "online",
-        "service": "Forensic AI Company Researcher",
+        "service": "VirajVerse Forensic AI Company Researcher",
         "engine": "NVIDIA NIM Multi-Agent Swarm",
         "default_model": settings.DEFAULT_LLM_MODEL
     }
 
 @app.get("/api/models")
+@app.get("/models")
 async def list_models():
     """Fetch available models from NVIDIA NIM."""
     try:
@@ -88,10 +95,14 @@ async def list_models():
     }
 
 @app.get("/api/mcp/status")
+@app.get("/mcp/status")
 async def get_mcp_status():
     return mcp_manager.get_server_status()
 
+@app.post("/api/research")
+@app.post("/research")
 @app.post("/api/research/stream")
+@app.post("/research/stream")
 async def stream_research(request: ResearchRequest):
     """Server-Sent Events (SSE) stream for real-time forensic investigation."""
     return StreamingResponse(
@@ -105,6 +116,7 @@ async def stream_research(request: ResearchRequest):
     )
 
 @app.post("/api/research/sync", response_model=ForensicCompanyReport)
+@app.post("/research/sync", response_model=ForensicCompanyReport)
 async def sync_research(request: ResearchRequest):
     """Execute complete research synchronously and return the finished report."""
     last_report = None
@@ -122,9 +134,9 @@ async def sync_research(request: ResearchRequest):
     return last_report
 
 @app.post("/api/simulate-pitch", response_model=PitchSimulationResponse)
+@app.post("/simulate-pitch", response_model=PitchSimulationResponse)
 async def simulate_pitch(request: PitchSimulationRequest):
     """Simulate real-time executive roleplay & pitch critique."""
-    # If dossier_id provided, inject high-signal context
     if request.dossier_id:
         dossier = await db.get_dossier(request.dossier_id)
         if dossier:
@@ -135,10 +147,12 @@ async def simulate_pitch(request: PitchSimulationRequest):
     return await pitch_simulator.simulate_pitch(request)
 
 @app.get("/api/dossiers")
+@app.get("/dossiers")
 async def list_dossiers(limit: int = Query(20, ge=1, le=100)):
     return await db.list_recent_dossiers(limit=limit)
 
 @app.get("/api/dossiers/{dossier_id}")
+@app.get("/dossiers/{dossier_id}")
 async def get_dossier(dossier_id: str):
     dossier = await db.get_dossier(dossier_id)
     if not dossier:
@@ -146,11 +160,13 @@ async def get_dossier(dossier_id: str):
     return dossier
 
 @app.delete("/api/dossiers/{dossier_id}")
+@app.delete("/dossiers/{dossier_id}")
 async def delete_dossier(dossier_id: str):
     success = await db.delete_dossier(dossier_id)
     return {"success": success}
 
 @app.get("/api/export/{dossier_id}/markdown")
+@app.get("/export/{dossier_id}/markdown")
 async def export_markdown(dossier_id: str):
     dossier = await db.get_dossier(dossier_id)
     if not dossier:
@@ -257,11 +273,5 @@ async def export_markdown(dossier_id: str):
 
 ### Red Flags & Landmines (Do NOT mention):
 {chr(10).join([f"- 🛑 {rm}" for rm in prep.get('red_flags_and_landmines', [])])}
-
-### 10x Deep Questions to Ask:
-{chr(10).join([f"{idx+1}. {q}" for idx, q in enumerate(prep.get('smart_deep_questions', []))])}
-
-### Gameplan Summary:
-> {prep.get('meeting_gameplan_summary')}
 """
     return PlainTextResponse(md, media_type="text/markdown")
