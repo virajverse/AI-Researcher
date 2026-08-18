@@ -336,3 +336,22 @@ export interface ResearchRequest {
   model_name?: string;
   depth?: string;
 }
+
+export interface DiscoveredCompany {
+  name: string;
+  website: string;
+  tagline: string;
+  category: string;
+  hq_location: string;
+  estimated_stage_or_funding: string;
+  why_it_matches: string;
+  key_features: string[];
+  tech_stack_preview: string[];
+}
+
+export interface DiscoveryResponse {
+  ai_response_text: string;
+  companies: DiscoveredCompany[];
+  follow_up_suggestions: string[];
+}
+

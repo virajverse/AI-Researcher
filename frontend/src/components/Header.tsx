@@ -1,10 +1,12 @@
 import React from 'react';
 import { 
   History, Scale, Download, 
-  Cpu, ChevronDown, CheckCircle2, Globe, Flame, ShieldCheck, Zap
+  Cpu, ChevronDown, CheckCircle2, Globe, Flame, ShieldCheck, Zap, Compass, Building2
 } from 'lucide-react';
 
 interface HeaderProps {
+  currentRoute: 'dossier' | 'finder';
+  onRouteChange: (route: 'dossier' | 'finder') => void;
   activeModel: string;
   onModelChange: (model: string) => void;
   availableModels: string[];
@@ -15,6 +17,8 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({
+  currentRoute,
+  onRouteChange,
   activeModel,
   onModelChange,
   availableModels,
@@ -97,6 +101,64 @@ export const Header: React.FC<HeaderProps> = ({
       {/* Controls & Actions (Right) */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
         
+        {/* Page Switcher Tabs */}
+        <div style={{
+          display: 'flex',
+          background: 'rgba(255, 255, 255, 0.04)',
+          border: '1px solid var(--border-subtle)',
+          borderRadius: '8px',
+          padding: '2px',
+          gap: '2px'
+        }}>
+          <button
+            type="button"
+            onClick={() => onRouteChange('dossier')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '4px 10px',
+              borderRadius: '6px',
+              fontSize: '0.74rem',
+              fontWeight: '700',
+              fontFamily: 'var(--font-heading)',
+              border: 'none',
+              cursor: 'pointer',
+              background: currentRoute === 'dossier' ? 'rgba(0, 240, 255, 0.15)' : 'transparent',
+              color: currentRoute === 'dossier' ? 'var(--cyan-neon)' : 'var(--text-muted)',
+              boxShadow: currentRoute === 'dossier' ? '0 0 10px rgba(0, 240, 255, 0.2)' : 'none',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            <ShieldCheck size={13} />
+            <span>Forensic Dossier</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onRouteChange('finder')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '4px 10px',
+              borderRadius: '6px',
+              fontSize: '0.74rem',
+              fontWeight: '700',
+              fontFamily: 'var(--font-heading)',
+              border: 'none',
+              cursor: 'pointer',
+              background: currentRoute === 'finder' ? 'rgba(112, 0, 255, 0.25)' : 'transparent',
+              color: currentRoute === 'finder' ? 'var(--purple-neon)' : 'var(--text-muted)',
+              boxShadow: currentRoute === 'finder' ? '0 0 10px rgba(112, 0, 255, 0.3)' : 'none',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            <Compass size={13} />
+            <span>Company Finder</span>
+          </button>
+        </div>
+
         {/* Model Switcher Dropdown */}
         <div style={{
           display: 'flex',

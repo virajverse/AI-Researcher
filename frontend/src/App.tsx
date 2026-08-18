@@ -17,11 +17,12 @@ import { ExportModal } from './components/ExportModal';
 import { CompareModal } from './components/CompareModal';
 import { QuickIntelligenceSnapshot } from './components/QuickIntelligenceSnapshot';
 import { PitchSimulatorStudio } from './components/PitchSimulatorStudio';
+import { CompanyFinderPage } from './components/CompanyFinderPage';
 import { API_BASE_URL } from './api/config';
 
 import { 
   Target, Building2, DollarSign, Package, 
-  Cpu, Rocket, Swords, Clock, ShieldCheck, ExternalLink, BrainCircuit 
+  Cpu, Rocket, Swords, Clock, ShieldCheck, ExternalLink, BrainCircuit, Compass
 } from 'lucide-react';
 
 const TABS = [
@@ -36,6 +37,33 @@ const TABS = [
 ];
 
 export const App: React.FC = () => {
+  // Page Routing State ('dossier' = / | 'finder' = /company-finder)
+  const [currentRoute, setCurrentRoute] = useState<'dossier' | 'finder'>(() => {
+    if (typeof window !== 'undefined' && (window.location.pathname.includes('finder') || window.location.pathname.includes('find'))) {
+      return 'finder';
+    }
+    return 'dossier';
+  });
+
+  const handleRouteChange = (route: 'dossier' | 'finder') => {
+    setCurrentRoute(route);
+    if (typeof window !== 'undefined') {
+      window.history.pushState(null, '', route === 'finder' ? '/company-finder' : '/');
+    }
+  };
+
+  useEffect(() => {
+    const handlePopState = () => {
+      if (window.location.pathname.includes('finder') || window.location.pathname.includes('find')) {
+        setCurrentRoute('finder');
+      } else {
+        setCurrentRoute('dossier');
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   const [activeModel, setActiveModel] = useState('meta/llama-3.1-70b-instruct');
   const [availableModels, setAvailableModels] = useState<string[]>([
     'meta/llama-3.1-70b-instruct',
@@ -161,10 +189,21 @@ export const App: React.FC = () => {
     }
   };
 
+  const handleLaunchAuditFromFinder = (companyName: string, websiteUrl?: string) => {
+    handleRouteChange('dossier');
+    handleStartSearch({
+      company_name: companyName,
+      website_url: websiteUrl,
+      depth: 'forensic'
+    });
+  };
+
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-primary)' }}>
       {/* Top Global Command Header */}
       <Header
+        currentRoute={currentRoute}
+        onRouteChange={handleRouteChange}
         activeModel={activeModel}
         onModelChange={setActiveModel}
         availableModels={availableModels}
@@ -174,29 +213,36 @@ export const App: React.FC = () => {
         hasActiveReport={!!currentReport}
       />
 
-      {/* Top Grid: 2. Search Console (Left) + 3. Swarm Terminal (Right) */}
-      <section style={{
-        padding: '16px 24px 0 24px',
-        display: 'grid',
-        gridTemplateColumns: 'minmax(480px, 1.25fr) minmax(440px, 1fr)',
-        gap: '16px',
-        alignItems: 'stretch',
-        maxWidth: '1600px',
-        margin: '0 auto',
-        width: '100%'
-      }}>
-        <SearchConsole
-          onSearch={handleStartSearch}
-          isLoading={isStreaming}
+      {currentRoute === 'finder' ? (
+        <CompanyFinderPage
+          onLaunchAudit={handleLaunchAuditFromFinder}
+          selectedModel={activeModel}
         />
-        <LiveResearchTerminal
-          logs={streamLogs}
-          activeAgent={activeAgent}
-          companyName={currentCompany}
-          isCompleted={!isStreaming && !!currentReport}
-          currentReport={currentReport}
-        />
-      </section>
+      ) : (
+        <>
+          {/* Top Grid: 2. Search Console (Left) + 3. Swarm Terminal (Right) */}
+          <section style={{
+            padding: '16px 24px 0 24px',
+            display: 'grid',
+            gridTemplateColumns: 'minmax(480px, 1.25fr) minmax(440px, 1fr)',
+            gap: '16px',
+            alignItems: 'stretch',
+            maxWidth: '1600px',
+            margin: '0 auto',
+            width: '100%'
+          }}>
+            <SearchConsole
+              onSearch={handleStartSearch}
+              isLoading={isStreaming}
+            />
+            <LiveResearchTerminal
+              logs={streamLogs}
+              activeAgent={activeAgent}
+              companyName={currentCompany}
+              isCompleted={!isStreaming && !!currentReport}
+              currentReport={currentReport}
+            />
+          </section>
 
       {/* Main Forensic Intelligence Dossier Dashboard */}
       {currentReport && (
@@ -347,6 +393,8 @@ export const App: React.FC = () => {
             Enter any company name or website URL above to launch our 8-agent forensic swarm across Company DNA, Revenue Models, Product Roadmaps, Tech Stacks, and Pre-Meeting Cheatsheets.
           </p>
         </div>
+      )}
+      </>
       )}
 
       {/* History Vault Drawer */}

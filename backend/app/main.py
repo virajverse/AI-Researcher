@@ -19,6 +19,7 @@ from app.models.schemas import (
 )
 from app.agents.orchestrator import orchestrator
 from app.agents.pitch_simulator import pitch_simulator
+from app.agents.discovery_agent import discovery_agent
 from app.storage.database import db
 from app.tools.mcp_manager import mcp_manager
 from app.tools.nvidia_llm import nvidia_client
@@ -278,3 +279,28 @@ async def export_markdown(dossier_id: str):
 {chr(10).join([f"- 🛑 {rm}" for rm in prep.get('red_flags_and_landmines', [])])}
 """
     return PlainTextResponse(md, media_type="text/markdown")
+    
+@app.post("/api/discover")
+@app.post("/discover")
+async def discover_companies(request: Request):
+    """Conversational Market Discovery & Company Sourcing Endpoint."""
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+
+    query = body.get("query") or body.get("prompt") or "AI startups"
+    industry = body.get("industry")
+    location = body.get("location")
+    stage = body.get("stage")
+    model = body.get("model")
+
+    result = await discovery_agent.discover_companies(
+        query=query,
+        industry=industry,
+        location=location,
+        stage=stage,
+        model_name=model
+    )
+    return JSONResponse(result)
+
