@@ -103,11 +103,17 @@ class NvidiaLLMClient:
             cleaned = cleaned[:-3]
         cleaned = cleaned.strip()
 
+        import re
+        # Remove JS single-line comments // ...
+        sanitized = re.sub(r'//.*', '', cleaned)
+        # Remove trailing commas before closing braces/brackets
+        sanitized = re.sub(r',\s*([}\]])', r'\1', sanitized)
+        sanitized = sanitized.strip()
+
         try:
-            return json.loads(cleaned)
+            return json.loads(sanitized)
         except json.JSONDecodeError:
-            import re
-            json_match = re.search(r"(\{.*\})", cleaned, re.DOTALL)
+            json_match = re.search(r"(\{.*\})", sanitized, re.DOTALL)
             if json_match:
                 try:
                     return json.loads(json_match.group(1))
