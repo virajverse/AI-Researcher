@@ -197,6 +197,16 @@ COMPETITORS & MOAT: {comp_res.model_dump_json()}
 
         duration = round(time.time() - start_time, 2)
 
+        # Calculate Dynamic Truth & Evidence Confidence Score
+        confidence = self._calculate_confidence_score(
+            sources_count=len(sources_inspected),
+            crawled_pages_count=len(crawled_pages),
+            basic=basic_res,
+            biz=biz_res,
+            tech=tech_res,
+            strat=strat_res
+        )
+
         # Assemble Final Master Dossier
         report = ForensicCompanyReport(
             id=dossier_id,
@@ -205,7 +215,7 @@ COMPETITORS & MOAT: {comp_res.model_dump_json()}
             created_at=datetime.now(timezone.utc).isoformat(),
             llm_model_used=model_name or "NVIDIA NIM meta/llama-3.3-70b-instruct",
             research_duration_seconds=duration,
-            confidence_score=96,
+            confidence_score=confidence,
             sources_inspected=sources_inspected[:25],
             basic=basic_res,
             business=biz_res,
@@ -219,8 +229,51 @@ COMPETITORS & MOAT: {comp_res.model_dump_json()}
         # Save to SQLite Database
         await db.save_dossier(dossier_id, report.model_dump())
 
-        yield self._format_sse("status", "COMPLETED", f"Forensic Dossier compiled in {duration}s. Confidence Score: 96%.", {"id": dossier_id})
+        yield self._format_sse("status", "COMPLETED", f"Forensic Dossier compiled in {duration}s. Confidence Score: {confidence}%.", {"id": dossier_id})
         yield self._format_sse("final_report", "DOSSIER", "Complete forensic report ready.", report.model_dump())
+
+    def _calculate_confidence_score(
+        self,
+        sources_count: int,
+        crawled_pages_count: int,
+        basic: Any,
+        biz: Any,
+        tech: Any,
+        strat: Any
+    ) -> int:
+        """Calculate real evidence-density confidence score (40% - 98%)."""
+        score = 45
+
+        # Footprint density
+        if sources_count >= 15:
+            score += 10
+        elif sources_count >= 5:
+            score += 5
+
+        if crawled_pages_count >= 4:
+            score += 10
+        elif crawled_pages_count >= 1:
+            score += 5
+
+        # Verified Founders & Leaders
+        if getattr(basic, "founders", None) and len(basic.founders) > 0:
+            if basic.founders[0].name not in ["Unknown", "Private / Early-Stage", "N/A"]:
+                score += 10
+
+        # Verified Offerings & ICP
+        if getattr(biz, "what_they_sell", None) and len(biz.what_they_sell) > 0:
+            score += 10
+
+        # Verified Tech Stack
+        ts = getattr(tech, "tech_stack", None)
+        if ts and (ts.frontend or ts.backend or ts.cloud_and_infra):
+            score += 10
+
+        # Verified Customers / Strategic Evidence
+        if getattr(biz, "main_customers", None) and len(biz.main_customers) > 0:
+            score += 5
+
+        return min(max(score, 45), 98)
 
     def _format_sse(self, event_type: str, agent: str, message: str, data: Any = None) -> str:
         payload = {
