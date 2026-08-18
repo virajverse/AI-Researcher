@@ -85,20 +85,43 @@ Perform forensic profile extraction now. Return JSON only."""
             )
 
             # Map into Pydantic model with safety fallbacks
-            founders = [FounderInfo(**f) if isinstance(f, dict) else FounderInfo(name=str(f)) for f in raw_data.get("founders", [])]
-            leadership = [LeaderInfo(**l) if isinstance(l, dict) else LeaderInfo(name=str(l), role="Executive") for l in raw_data.get("leadership", [])]
+            founders = []
+            for f in raw_data.get("founders", []):
+                try:
+                    founders.append(FounderInfo(**f) if isinstance(f, dict) else FounderInfo(name=str(f)))
+                except Exception:
+                    founders.append(FounderInfo(name=str(f) if not isinstance(f, dict) else str(f.get("name", "Founder"))))
+
+            leadership = []
+            for l in raw_data.get("leadership", []):
+                try:
+                    leadership.append(LeaderInfo(**l) if isinstance(l, dict) else LeaderInfo(name=str(l), role="Executive"))
+                except Exception:
+                    leadership.append(LeaderInfo(name=str(l) if not isinstance(l, dict) else str(l.get("name", "Executive")), role="Executive"))
             
-            loc_data = raw_data.get("location", {})
-            location = LocationInfo(**loc_data) if isinstance(loc_data, dict) else LocationInfo()
+            try:
+                loc_data = raw_data.get("location", {})
+                location = LocationInfo(**loc_data) if isinstance(loc_data, dict) else LocationInfo(headquarters=str(loc_data) if loc_data else "Unknown")
+            except Exception:
+                location = LocationInfo()
 
-            size_data = raw_data.get("size", {})
-            size = CompanySizeInfo(**size_data) if isinstance(size_data, dict) else CompanySizeInfo()
+            try:
+                size_data = raw_data.get("size", {})
+                size = CompanySizeInfo(**size_data) if isinstance(size_data, dict) else CompanySizeInfo(headcount=str(size_data) if size_data else "Unknown")
+            except Exception:
+                size = CompanySizeInfo()
 
-            ind_data = raw_data.get("industry", {})
-            industry = IndustryInfo(**ind_data) if isinstance(ind_data, dict) else IndustryInfo()
+            try:
+                ind_data = raw_data.get("industry", {})
+                industry = IndustryInfo(**ind_data) if isinstance(ind_data, dict) else IndustryInfo()
+            except Exception:
+                industry = IndustryInfo()
 
-            age_data = raw_data.get("age", {})
-            age = AgeInfo(**age_data) if isinstance(age_data, dict) else AgeInfo()
+            try:
+                age_data = raw_data.get("age", {})
+                age = AgeInfo(**age_data) if isinstance(age_data, dict) else AgeInfo()
+            except Exception:
+                age = AgeInfo()
 
             return BasicCompanyDNA(
                 company_name=raw_data.get("company_name", company_name),

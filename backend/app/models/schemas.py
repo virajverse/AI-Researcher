@@ -14,20 +14,54 @@ class LeaderInfo(BaseModel):
     background: Optional[str] = None
 
 class LocationInfo(BaseModel):
-    headquarters: str = "Unknown"
+    headquarters: Optional[str] = "Unknown"
     global_offices: List[str] = Field(default_factory=list)
     work_policy: Optional[str] = "Hybrid / Remote / In-office"
 
+    @field_validator('headquarters', mode='before')
+    @classmethod
+    def coerce_hq(cls, v):
+        if isinstance(v, dict):
+            return ", ".join([str(val) for val in v.values() if val])
+        if isinstance(v, list):
+            return ", ".join([str(val) for val in v if val])
+        return str(v) if v is not None else "Unknown"
+
+    @field_validator('global_offices', mode='before')
+    @classmethod
+    def coerce_offices(cls, v):
+        if isinstance(v, str):
+            return [v] if v else []
+        if isinstance(v, dict):
+            return list(v.values())
+        return v or []
+
 class CompanySizeInfo(BaseModel):
-    headcount: str = "Unknown"
+    headcount: Optional[str] = "Unknown"
     estimated_employees: Optional[int] = None
     department_breakdown: Optional[Dict[str, str]] = None
     growth_trend: Optional[str] = None
+
+    @field_validator('headcount', mode='before')
+    @classmethod
+    def coerce_headcount(cls, v):
+        if isinstance(v, (int, float)):
+            return f"~{int(v)} employees"
+        if isinstance(v, dict):
+            return ", ".join([f"{k}: {val}" for k, val in v.items()])
+        return str(v) if v is not None else "Unknown"
 
 class IndustryInfo(BaseModel):
     primary: str = "Technology"
     sub_sectors: List[str] = Field(default_factory=list)
     tags: List[str] = Field(default_factory=list)
+
+    @field_validator('sub_sectors', 'tags', mode='before')
+    @classmethod
+    def coerce_list(cls, v):
+        if isinstance(v, str):
+            return [v] if v else []
+        return v or []
 
 class CorporateRegistryDNA(BaseModel):
     cin_or_reg_number: Optional[str] = None
@@ -54,10 +88,20 @@ class SecurityAndInfraRadar(BaseModel):
     compliance_signals: List[str] = Field(default_factory=list)
 
 class AgeInfo(BaseModel):
-    founded_year: Optional[int] = None
-    age_years: Optional[int] = None
+    founded_year: Optional[Any] = None
+    age_years: Optional[Any] = None
     historical_summary: Optional[str] = None
     corporate_registry: Optional[CorporateRegistryDNA] = Field(default_factory=CorporateRegistryDNA)
+
+    @field_validator('founded_year', 'age_years', mode='before')
+    @classmethod
+    def coerce_ints(cls, v):
+        if v is None or v == "":
+            return None
+        try:
+            return int(v)
+        except (ValueError, TypeError):
+            return None
 
 class BasicCompanyDNA(BaseModel):
     company_name: str

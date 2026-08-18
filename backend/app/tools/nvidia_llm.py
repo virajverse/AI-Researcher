@@ -16,8 +16,8 @@ class NvidiaLLMClient:
         self.fast_model = settings.FAST_LLM_MODEL or "meta/llama-3.1-8b-instruct"
         self._semaphore = asyncio.Semaphore(4)
 
-    def _sync_post(self, payload: Dict[str, Any], timeout: float = 40.0) -> str:
-        """Robust synchronous POST with urllib (most stable on Windows SSL)."""
+    def _sync_post(self, payload: Dict[str, Any], timeout: float = 75.0) -> str:
+        """Robust synchronous POST with urllib with generous 75s timeout."""
         url = f"{self.base_url}/chat/completions"
         data = json.dumps(payload).encode("utf-8")
         req = urllib.request.Request(
