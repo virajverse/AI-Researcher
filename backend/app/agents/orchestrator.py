@@ -187,11 +187,25 @@ TECH STACK & AI: {tech_res.model_dump_json()}
 STRATEGY & FUNDING: {strat_res.model_dump_json()}
 COMPETITORS & MOAT: {comp_res.model_dump_json()}
 """
+        # Auto-resolve meeting person and role from discovered DNA if left blank
+        resolved_person = request.meeting_person
+        resolved_role = request.meeting_role
+        if not resolved_person or resolved_person.strip() == "":
+            if basic_res.founders and len(basic_res.founders) > 0 and basic_res.founders[0].name not in ["Unknown", "Private / Early-Stage", "N/A"]:
+                resolved_person = basic_res.founders[0].name
+                resolved_role = resolved_role or basic_res.founders[0].role or "Founder / Executive"
+            elif basic_res.leadership and len(basic_res.leadership) > 0:
+                resolved_person = basic_res.leadership[0].name
+                resolved_role = resolved_role or basic_res.leadership[0].role or "Leadership Executive"
+            else:
+                resolved_person = f"{company} Executive"
+                resolved_role = resolved_role or "CEO / Decision Maker"
+
         pre_meeting_res = await meeting_agent_inst.investigate(
             company_name=company,
-            meeting_person=request.meeting_person,
-            meeting_role=request.meeting_role,
-            meeting_topic=request.meeting_topic,
+            meeting_person=resolved_person,
+            meeting_role=resolved_role,
+            meeting_topic=request.meeting_topic or f"Enterprise Partnership with {company}",
             forensic_context=meeting_context_str
         )
 

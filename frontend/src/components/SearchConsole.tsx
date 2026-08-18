@@ -11,12 +11,48 @@ interface SearchConsoleProps {
 }
 
 const QUICK_COMPANIES = [
-  { name: 'Linear', url: 'https://linear.app' },
-  { name: 'Stripe', url: 'https://stripe.com' },
-  { name: 'Retool', url: 'https://retool.com' },
-  { name: 'Cursor', url: 'https://cursor.com' },
-  { name: 'Datadog', url: 'https://datadoghq.com' },
-  { name: 'Taliyo Tech', url: 'https://www.taliyotechnologies.com/' },
+  { 
+    name: 'Taliyo Tech', 
+    url: 'https://www.taliyotechnologies.com/',
+    person: 'Viraj Srivastav',
+    role: 'CEO & Founder',
+    topic: 'Enterprise AI Agent Systems & Cloud Engineering'
+  },
+  { 
+    name: 'Linear', 
+    url: 'https://linear.app',
+    person: 'Karri Saarinen',
+    role: 'CEO & Co-Founder',
+    topic: 'Next-Gen Developer Ergonomics & Issue Tracking'
+  },
+  { 
+    name: 'Stripe', 
+    url: 'https://stripe.com',
+    person: 'Patrick Collison',
+    role: 'CEO & Co-Founder',
+    topic: 'Global Embedded Payments & Financial Infrastructure'
+  },
+  { 
+    name: 'Retool', 
+    url: 'https://retool.com',
+    person: 'David Hsu',
+    role: 'CEO & Founder',
+    topic: 'Internal Developer Operations & Workflow Customization'
+  },
+  { 
+    name: 'Cursor', 
+    url: 'https://cursor.com',
+    person: 'Michael Truell',
+    role: 'CEO & Co-Founder',
+    topic: 'AI Developer Productivity & Code Intelligence'
+  },
+  { 
+    name: 'Datadog', 
+    url: 'https://datadoghq.com',
+    person: 'Olivier Pomel',
+    role: 'CEO & Co-Founder',
+    topic: 'Cloud Observability & Security Monitoring'
+  },
 ];
 
 export const SearchConsole: React.FC<SearchConsoleProps> = ({ onSearch, isLoading }) => {
@@ -64,12 +100,15 @@ export const SearchConsole: React.FC<SearchConsoleProps> = ({ onSearch, isLoadin
     const resolvedName = c.name === 'Taliyo Tech' ? 'Taliyo Technologies' : c.name;
     setQuery(resolvedName);
     setWebsiteUrl(c.url);
+    setPerson(c.person);
+    setRole(c.role);
+    setTopic(c.topic);
     onSearch({
       company_name: resolvedName,
       website_url: c.url,
-      meeting_person: person.trim() || undefined,
-      meeting_role: role.trim() || undefined,
-      meeting_topic: topic.trim() || undefined,
+      meeting_person: c.person,
+      meeting_role: c.role,
+      meeting_topic: c.topic,
       depth: depth.toLowerCase().includes('deep') ? 'forensic' : 'lightning'
     });
   };
