@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: virajverse-ai-researcher-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: NVIDIA_API_KEY
+        sync: false
+      - key: NVIDIA_BASE_URL
+        value: https://integrate.api.nvidia.com/v1
+      - key: DEFAULT_LLM_MODEL
+        value: meta/llama-3.1-8b-instruct
+      - key: REASONING_LLM_MODEL
+        value: meta/llama-3.1-70b-instruct
+      - key: FAST_LLM_MODEL
+        value: meta/llama-3.1-8b-instruct
+      - key: CORS_ORIGINS
+        value: "*"
+      - key: DATABASE_PATH
+        value: app/storage/researcher.db
