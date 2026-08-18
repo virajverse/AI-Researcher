@@ -7,7 +7,7 @@ from contextlib import asynccontextmanager
 if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks, Query
+from fastapi import FastAPI, HTTPException, BackgroundTasks, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, PlainTextResponse, JSONResponse
 import httpx
@@ -99,6 +99,9 @@ async def list_models():
 async def get_mcp_status():
     return mcp_manager.get_server_status()
 
+# Universal POST handler for research stream (handles /api/research, /research, /api/research/stream, etc.)
+@app.post("/")
+@app.post("/api")
 @app.post("/api/research")
 @app.post("/research")
 @app.post("/api/research/stream")
