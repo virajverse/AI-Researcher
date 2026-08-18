@@ -1,7 +1,10 @@
 import asyncio
 import logging
 from typing import Dict, Any, Optional
-from playwright.async_api import async_playwright
+try:
+    from playwright.async_api import async_playwright
+except ImportError:
+    async_playwright = None
 from app.config import settings
 
 logger = logging.getLogger(__name__)
@@ -24,6 +27,9 @@ class PlaywrightScraper:
             "screenshot_base64": None,
             "success": False
         }
+
+        if async_playwright is None:
+            return result
 
         try:
             async with async_playwright() as p:

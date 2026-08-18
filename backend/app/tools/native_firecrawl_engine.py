@@ -5,7 +5,10 @@ import logging
 from urllib.parse import urljoin, urlparse
 from typing import Dict, Any, List, Optional, Set
 from bs4 import BeautifulSoup, Comment, Tag
-from playwright.async_api import async_playwright
+try:
+    from playwright.async_api import async_playwright
+except ImportError:
+    async_playwright = None
 import httpx
 
 from app.config import settings
@@ -122,6 +125,8 @@ class NativeFirecrawlEngine:
 
     async def _playwright_scrape(self, url: str) -> Dict[str, Any]:
         """Playwright Chromium Browser Scraper with DOM hydration & JS evaluation."""
+        if async_playwright is None:
+            raise RuntimeError("Playwright not installed in environment (Running in Serverless mode)")
         async with async_playwright() as p:
             browser = await p.chromium.launch(
                 headless=self.headless,
